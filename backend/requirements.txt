@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+python-jose
+python-multipart
+firebase-admin
+pydantic
