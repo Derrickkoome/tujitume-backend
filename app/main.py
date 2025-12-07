@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import engine, Base
-from app.routers import gigs, users
+from app.routers import gigs, users, applications, reviews
 from app.models import models
 
 # Create database tables
@@ -25,6 +25,8 @@ app.add_middleware(
 # Include routers
 app.include_router(gigs.router)
 app.include_router(users.router)
+app.include_router(applications.router)
+app.include_router(reviews.router)
 
 
 @app.get("/")
