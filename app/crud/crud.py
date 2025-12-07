@@ -160,3 +160,50 @@ def update_application_status(db: Session, application_id: int, status: str) -> 
     db.commit()
     db.refresh(db_application)
     return db_application
+
+
+# ========== REVIEWS ==========
+
+def create_review(db: Session, review_data: dict) -> models.Review:
+    """Create a new review"""
+    review = models.Review(**review_data)
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    return review
+
+
+def get_user_reviews(db: Session, user_id: str) -> List[models.Review]:
+    """Get all reviews for a specific user"""
+    return db.query(models.Review)\
+        .filter(models.Review.reviewed_user_id == user_id)\
+        .order_by(models.Review.created_at.desc())\
+        .all()
+
+
+def get_review(db: Session, review_id: int) -> Optional[models.Review]:
+    """Get a review by ID"""
+    return db.query(models.Review).filter(models.Review.id == review_id).first()
+
+
+def check_existing_review(db: Session, gig_id: int, reviewer_id: str, reviewed_user_id: str) -> Optional[models.Review]:
+    """Check if a review already exists for this gig from this reviewer to this user"""
+    return db.query(models.Review)\
+        .filter(
+            models.Review.gig_id == gig_id,
+            models.Review.reviewer_id == reviewer_id,
+            models.Review.reviewed_user_id == reviewed_user_id
+        )\
+        .first()
+
+
+# ========== GIG COMPLETION ==========
+
+def mark_gig_completed(db: Session, gig_id: int) -> Optional[models.Gig]:
+    """Mark a gig as completed"""
+    gig = db.query(models.Gig).filter(models.Gig.id == gig_id).first()
+    if gig:
+        gig.is_completed = "true"
+        db.commit()
+        db.refresh(gig)
+    return gig

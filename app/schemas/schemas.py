@@ -85,3 +85,39 @@ class GigWithOwner(GigResponse):
 class ApplicationWithDetails(ApplicationResponse):
     gig: Optional[GigResponse] = None
     applicant: Optional[UserResponse] = None
+
+
+# Review Schemas
+class ReviewBase(BaseModel):
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5 stars")
+    comment: Optional[str] = None
+
+
+class ReviewCreate(ReviewBase):
+    gig_id: int
+    reviewed_user_id: str  # UID of the user being reviewed
+
+
+class ReviewResponse(ReviewBase):
+    id: int
+    gig_id: int
+    reviewer_id: str
+    reviewed_user_id: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ReviewWithDetails(ReviewResponse):
+    reviewer: Optional[UserResponse] = None
+    
+    class Config:
+        from_attributes = True
+
+
+class UserReviewStats(BaseModel):
+    average_rating: float
+    total_reviews: int
+    reviews: List[ReviewWithDetails] = []

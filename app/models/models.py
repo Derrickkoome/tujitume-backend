@@ -30,6 +30,7 @@ class Gig(Base):
     skills_required = Column(JSON)  # Array of strings
     deadline = Column(DateTime)
     owner_id = Column(String, ForeignKey("users.uid"), nullable=False)
+    is_completed = Column(String, default="false")  # "false", "true"
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -52,3 +53,20 @@ class Application(Base):
     # Relationships
     gig = relationship("Gig", back_populates="applications")
     applicant = relationship("User", back_populates="applications")
+
+
+class Review(Base):
+    __tablename__ = "reviews"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    gig_id = Column(Integer, ForeignKey("gigs.id"), nullable=False)
+    reviewer_id = Column(String, ForeignKey("users.uid"), nullable=False)  # Who wrote the review
+    reviewed_user_id = Column(String, ForeignKey("users.uid"), nullable=False)  # Who is being reviewed
+    rating = Column(Integer, nullable=False)  # 1-5 stars
+    comment = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    reviewer = relationship("User", foreign_keys=[reviewer_id])
+    reviewed_user = relationship("User", foreign_keys=[reviewed_user_id])
