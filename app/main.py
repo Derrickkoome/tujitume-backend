@@ -17,6 +17,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://tujitume-app.netlify.app",  # Production frontend
         "http://localhost:5173",  # Vite dev server
         "http://localhost:3000",  # Alternative dev server
     ],
