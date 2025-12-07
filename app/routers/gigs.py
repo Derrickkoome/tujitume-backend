@@ -23,7 +23,7 @@ def complete_gig(
         raise HTTPException(status_code=403, detail="Not authorized to complete this gig")
 
     # Check status (Can only complete if it was In Progress)
-    if gig.status != "IN_PRO   GRESS":
+    if gig.status != "IN_PROGRESS":
         raise HTTPException(status_code=400, detail="Gig must be IN_PROGRESS to mark as complete")
 
     gig.status = "COMPLETED"
