@@ -1,15 +1,16 @@
 # Tujitume Backend API
 
-FastAPI backend for the Tujitume Gig Platform.
+FastAPI backend for the Tujitume Gig Platform with Firebase authentication and token verification.
 
 ## Features
 
-- 🔐 Firebase Authentication
+- 🔐 Firebase Authentication & ID Token Verification
 - 📝 Gig CRUD operations
 - 💼 Application management
 - 👤 User profiles
 - 🔍 Advanced filtering and sorting
 - 📊 PostgreSQL/SQLite database support
+- 🗄️ Database migrations with Alembic
 - 🚀 Auto-generated API documentation
 
 ## Tech Stack
@@ -81,7 +82,14 @@ DATABASE_URL=sqlite:///./tujitume.db
 
 # Or for PostgreSQL (production)
 # DATABASE_URL=postgresql://user:password@localhost:5432/tujitume
+
+# Firebase Service Account (required for auth)
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccountKey.json
+# Or alternatively:
+# FIREBASE_SERVICE_ACCOUNT_PATH=/path/to/serviceAccountKey.json
 ```
+
+**Important**: Obtain a Firebase service account JSON file from Firebase Console → Project settings → Service accounts → Generate new private key. Save it securely and do NOT commit it to git.
 
 ### 5. Run the Server
 
@@ -181,16 +189,32 @@ curl -X POST http://localhost:8000/api/gigs/1/apply \
 6. Set the path in `.env`:
    ```
    FIREBASE_SERVICE_ACCOUNT_PATH=/path/to/serviceAccountKey.json
+   # or
+   GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccountKey.json
    ```
 
 ### Authentication Flow
 
 1. Frontend authenticates user with Firebase
 2. Frontend gets Firebase ID token
-3. Frontend sends token in `Authorization: Bearer TOKEN` header
-4. Backend verifies token with Firebase Admin SDK
+3. Frontend sends token in `Authorization: Bearer <ID_TOKEN>` header
+4. Backend verifies token with Firebase Admin SDK (via `POST /api/auth/session` or middleware)
 5. Backend creates/retrieves user in database
 6. Request proceeds with authenticated user context
+
+### Token Verification Endpoint
+
+**POST** `/api/auth/session` - Verifies Firebase ID token and returns decoded token info (uid, email, etc.)
+
+**Request Headers:**
+```
+Authorization: Bearer <ID_TOKEN>
+```
+
+**Security Notes:**
+- Always use HTTPS in production
+- Restrict endpoint access and create server-side sessions after verification
+- Never expose service account credentials in your codebase
 
 ## Database Models
 
@@ -237,14 +261,23 @@ isort app/
 
 ### Database Migrations
 
-For database migrations, consider using Alembic:
+This project uses Alembic for database migrations:
 
 ```bash
-pip install alembic
-alembic init alembic
-alembic revision --autogenerate -m "Initial migration"
+# Create a new migration
+alembic revision --autogenerate -m "Description of changes"
+
+# Apply migrations
 alembic upgrade head
+
+# Rollback last migration
+alembic downgrade -1
+
+# View migration history
+alembic history
 ```
+
+The `alembic/` directory contains the migration configuration and version scripts.
 
 ## Deployment
 
