@@ -11,9 +11,9 @@ ENV/
 dist/
 build/
 
-# Environment variables
+# Environment
 .env
-.env.local
+.env.*
 
 # Database
 *.db
@@ -27,7 +27,15 @@ build/
 *.swo
 *~
 
-# Firebase
+# Git
+.git/
+.github/
+.gitignore
+
+# Documentation
+README.md
+
+# Firebase credentials
 serviceAccountKey.json
 *-firebase-adminsdk-*.json
 
@@ -37,3 +45,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Tests
+tests/
+pytest.ini
+.pytest_cache/
