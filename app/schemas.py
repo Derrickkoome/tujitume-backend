@@ -16,7 +16,6 @@ class ApplicationResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Gig Schemas ---
 class GigBase(BaseModel):
     title: str
     description: str
@@ -30,8 +29,7 @@ class GigResponse(GigBase):
 
     class Config:
         from_attributes = True
-        
-        # --- Review Schemas ---
+
 class ReviewBase(BaseModel):
     gig_id: int
     reviewee_id: int
