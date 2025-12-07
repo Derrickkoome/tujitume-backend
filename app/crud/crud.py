@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from typing import List, Optional
-from app.models.models import User, Gig, Application
+from app.models.models import User, Gig, Application, Review
 from app.schemas import schemas
 from datetime import datetime
 
@@ -164,44 +164,44 @@ def update_application_status(db: Session, application_id: int, status: str) -> 
 
 # ========== REVIEWS ==========
 
-def create_review(db: Session, review_data: dict) -> models.Review:
+def create_review(db: Session, review_data: dict) -> Review:
     """Create a new review"""
-    review = models.Review(**review_data)
+    review = Review(**review_data)
     db.add(review)
     db.commit()
     db.refresh(review)
     return review
 
 
-def get_user_reviews(db: Session, user_id: str) -> List[models.Review]:
+def get_user_reviews(db: Session, user_id: str) -> List[Review]:
     """Get all reviews for a specific user"""
-    return db.query(models.Review)\
-        .filter(models.Review.reviewed_user_id == user_id)\
-        .order_by(models.Review.created_at.desc())\
+    return db.query(Review)\
+        .filter(Review.reviewed_user_id == user_id)\
+        .order_by(Review.created_at.desc())\
         .all()
 
 
-def get_review(db: Session, review_id: int) -> Optional[models.Review]:
+def get_review(db: Session, review_id: int) -> Optional[Review]:
     """Get a review by ID"""
-    return db.query(models.Review).filter(models.Review.id == review_id).first()
+    return db.query(Review).filter(Review.id == review_id).first()
 
 
-def check_existing_review(db: Session, gig_id: int, reviewer_id: str, reviewed_user_id: str) -> Optional[models.Review]:
+def check_existing_review(db: Session, gig_id: int, reviewer_id: str, reviewed_user_id: str) -> Optional[Review]:
     """Check if a review already exists for this gig from this reviewer to this user"""
-    return db.query(models.Review)\
+    return db.query(Review)\
         .filter(
-            models.Review.gig_id == gig_id,
-            models.Review.reviewer_id == reviewer_id,
-            models.Review.reviewed_user_id == reviewed_user_id
+            Review.gig_id == gig_id,
+            Review.reviewer_id == reviewer_id,
+            Review.reviewed_user_id == reviewed_user_id
         )\
         .first()
 
 
 # ========== GIG COMPLETION ==========
 
-def mark_gig_completed(db: Session, gig_id: int) -> Optional[models.Gig]:
+def mark_gig_completed(db: Session, gig_id: int) -> Optional[Gig]:
     """Mark a gig as completed"""
-    gig = db.query(models.Gig).filter(models.Gig.id == gig_id).first()
+    gig = db.query(Gig).filter(Gig.id == gig_id).first()
     if gig:
         gig.is_completed = "true"
         db.commit()
