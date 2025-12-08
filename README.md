@@ -2,6 +2,8 @@
 
 FastAPI backend for the Tujitume Gig Platform with Firebase authentication and token verification.
 
+**Frontend Repository**: [https://github.com/Derrickkoome/Tujitume-frontend](https://github.com/Derrickkoome/Tujitume-Frontend)
+
 ## Features
 
 - 🔐 Firebase Authentication & ID Token Verification
