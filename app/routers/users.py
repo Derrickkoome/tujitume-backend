@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 
 @router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
-async def register_user(
+def register_user(
     user_data: schemas.UserCreate,
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
@@ -19,6 +19,8 @@ async def register_user(
     Register/sync user from Firebase to database.
     Creates user if doesn't exist, returns existing user if already registered.
     """
+    from firebase_admin import auth
+    
     # Verify Firebase token
     if not authorization or not authorization.startswith('Bearer '):
         raise HTTPException(
@@ -27,8 +29,15 @@ async def register_user(
         )
     
     token = authorization.split('Bearer ')[1]
-    decoded_token = await verify_firebase_token(token)
-    uid = decoded_token['uid']
+    try:
+        decoded_token = auth.verify_id_token(token)
+        uid = decoded_token['uid']
+    except Exception as e:
+        print(f"Token verification failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token"
+        )
     
     # Check if user already exists
     existing_user = crud.get_user(db, uid)
