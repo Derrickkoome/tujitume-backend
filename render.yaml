@@ -1,0 +1,10 @@
+# Render.com configuration
+# This file tells Render how to build and start your application
+
+# Build Command (runs during deployment)
+# Installs dependencies and runs database migrations
+buildCommand: pip install -r requirements.txt && alembic upgrade head
+
+# Start Command (runs to start the server)
+# Uses gunicorn with uvicorn workers for production FastAPI
+startCommand: gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
