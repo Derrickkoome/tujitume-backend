@@ -10,15 +10,29 @@ import os
 
 # Initialize Firebase Admin (only once)
 if not firebase_admin._apps:
-    # Check if running in production with service account
-    cred_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
-    if cred_path and os.path.exists(cred_path):
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
+    # Try JSON from environment variable first (for Render/cloud platforms)
+    firebase_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+    if firebase_json:
+        import json
+        try:
+            cred_dict = json.loads(firebase_json)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+            print("Firebase initialized from environment variable")
+        except Exception as e:
+            print(f"Failed to initialize Firebase from JSON env var: {e}")
+    # Check if running with service account file path
+    elif os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH"):
+        cred_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
+        if os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            print(f"Firebase initialized from file: {cred_path}")
     else:
         # Development mode - use default credentials or application default
         try:
             firebase_admin.initialize_app()
+            print("Firebase initialized with default credentials")
         except Exception as e:
             print(f"Warning: Firebase not initialized: {e}")
             print("Firebase auth will not work without proper credentials")
