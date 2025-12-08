@@ -31,6 +31,21 @@ def get_or_create_user(db: Session, uid: str, email: str, name: Optional[str] = 
     return user
 
 
+def update_user(db: Session, uid: str, user_update: schemas.UserUpdate) -> Optional[User]:
+    db_user = get_user(db, uid)
+    if not db_user:
+        return None
+    
+    update_data = user_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+    
+    db_user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
 # Gig CRUD
 def get_gig(db: Session, gig_id: int) -> Optional[Gig]:
     return db.query(Gig).filter(Gig.id == gig_id).first()
@@ -130,6 +145,24 @@ def get_gig_applications(db: Session, gig_id: int) -> List[Application]:
 
 def get_user_applications(db: Session, applicant_id: str) -> List[Application]:
     return db.query(Application).filter(Application.applicant_id == applicant_id).order_by(Application.created_at.desc()).all()
+
+
+def get_gig_applications_with_details(db: Session, gig_id: int) -> List[Application]:
+    """Get applications with applicant details loaded"""
+    applications = db.query(Application).filter(Application.gig_id == gig_id).order_by(Application.created_at.desc()).all()
+    # Load applicant relationship
+    for app in applications:
+        _ = app.applicant  # This triggers the lazy load
+    return applications
+
+
+def get_user_applications_with_details(db: Session, applicant_id: str) -> List[Application]:
+    """Get user's applications with gig details loaded"""
+    applications = db.query(Application).filter(Application.applicant_id == applicant_id).order_by(Application.created_at.desc()).all()
+    # Load gig relationship
+    for app in applications:
+        _ = app.gig  # This triggers the lazy load
+    return applications
 
 
 def check_existing_application(db: Session, gig_id: int, applicant_id: str) -> Optional[Application]:

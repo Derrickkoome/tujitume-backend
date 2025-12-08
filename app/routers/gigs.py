@@ -176,14 +176,14 @@ def apply_to_gig(
     )
 
 
-@router.get("/{gig_id}/applications", response_model=List[schemas.ApplicationResponse])
+@router.get("/{gig_id}/applications", response_model=List[schemas.ApplicationWithDetails])
 def get_gig_applications(
     gig_id: int,
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get all applications for a gig. Only the gig owner can view applications.
+    Get all applications for a gig with applicant details. Only the gig owner can view applications.
     """
     gig = crud.get_gig(db, gig_id)
     if not gig:
@@ -199,4 +199,4 @@ def get_gig_applications(
             detail="Not authorized to view applications for this gig"
         )
     
-    return crud.get_gig_applications(db, gig_id)
+    return crud.get_gig_applications_with_details(db, gig_id)

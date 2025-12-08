@@ -10,6 +10,10 @@ class User(Base):
     uid = Column(String, primary_key=True, index=True)  # Firebase UID
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String)
+    bio = Column(Text)  # User bio/description
+    skills = Column(JSON)  # Array of skills
+    phone = Column(String)  # Contact phone number
+    location = Column(String)  # User location
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
