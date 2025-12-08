@@ -1,12 +1,43 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.schemas import schemas
 from app.crud import crud
-from app.core.dependencies import get_db, get_current_user
+from app.core.dependencies import get_db, get_current_user, verify_firebase_token
 
 
 router = APIRouter(prefix="/api/users", tags=["users"])
+
+
+@router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
+async def register_user(
+    user_data: schemas.UserCreate,
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+):
+    """
+    Register/sync user from Firebase to database.
+    Creates user if doesn't exist, returns existing user if already registered.
+    """
+    # Verify Firebase token
+    if not authorization or not authorization.startswith('Bearer '):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid authorization header"
+        )
+    
+    token = authorization.split('Bearer ')[1]
+    decoded_token = await verify_firebase_token(token)
+    uid = decoded_token['uid']
+    
+    # Check if user already exists
+    existing_user = crud.get_user(db, uid)
+    if existing_user:
+        return existing_user
+    
+    # Create new user
+    new_user = crud.create_user(db, user_data, uid)
+    return new_user
 
 
 @router.get("/me", response_model=schemas.UserResponse)
