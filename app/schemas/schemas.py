@@ -7,10 +7,22 @@ from datetime import datetime
 class UserBase(BaseModel):
     email: EmailStr
     name: Optional[str] = None
+    bio: Optional[str] = None
+    skills: Optional[List[str]] = None
+    phone: Optional[str] = None
+    location: Optional[str] = None
 
 
 class UserCreate(UserBase):
     uid: str
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    skills: Optional[List[str]] = None
+    phone: Optional[str] = None
+    location: Optional[str] = None
 
 
 class UserResponse(UserBase):

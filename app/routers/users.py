@@ -47,12 +47,30 @@ def get_my_gigs(
     return crud.get_user_gigs(db, current_user["uid"])
 
 
-@router.get("/me/applications", response_model=List[schemas.ApplicationResponse])
+@router.get("/me/applications", response_model=List[schemas.ApplicationWithDetails])
 def get_my_applications(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get all applications submitted by the current user.
+    Get all applications submitted by the current user with gig details.
     """
-    return crud.get_user_applications(db, current_user["uid"])
+    return crud.get_user_applications_with_details(db, current_user["uid"])
+
+
+@router.put("/me", response_model=schemas.UserResponse)
+def update_my_profile(
+    user_update: schemas.UserUpdate,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update current user's profile information.
+    """
+    updated_user = crud.update_user(db, current_user["uid"], user_update)
+    if not updated_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return updated_user
